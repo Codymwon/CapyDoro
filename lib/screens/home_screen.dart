@@ -11,6 +11,7 @@ import '../widgets/session_dots.dart';
 import '../widgets/timer_bar.dart';
 import '../main.dart' show themeProvider, settingsProvider;
 import 'settings_screen.dart';
+import 'tip_jar_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -183,6 +184,86 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onTimerUpdate() {
     setState(() {});
+
+    // Optional Tip Jar milestone prompt
+    // We only prompt when transitioning to a break or completing a cycle, never during focus.
+    // To prevent spam, we track the last prompted session count.
+    if (_timer.phase != PomodoroPhase.focus &&
+        _timer.phase != PomodoroPhase.idle) {
+      final lifeTime = settingsProvider.totalLifetimeSessions;
+      // Prompt at 10 sessions, 50 sessions, etc.
+      if (lifeTime > 0 && (lifeTime == 5 || lifeTime % 20 == 0)) {
+        _showTipJarPromptLocked(lifeTime);
+      }
+    }
+  }
+
+  int _lastPromptedSession = -1;
+
+  void _showTipJarPromptLocked(int currentLifeTime) {
+    if (_lastPromptedSession == currentLifeTime) return;
+    _lastPromptedSession = currentLifeTime;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Wow, $currentLifeTime Focus Sessions! 🎉',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'You are crushing it. If capydoro has been helpful, would you consider leaving a small tip to support the app?',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Maybe later'),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const TipJarScreen()),
+                      );
+                    },
+                    child: const Text('Support the Capybara ☕'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   @override

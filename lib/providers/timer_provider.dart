@@ -144,6 +144,7 @@ class TimerProvider extends ChangeNotifier {
     switch (_phase) {
       case PomodoroPhase.focus:
         _sessionCount++;
+        _settings.incrementLifetimeSessions();
 
         // Play sound for finishing focus and entering break
         if (_settings.soundEnabled) {

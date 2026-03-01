@@ -11,6 +11,7 @@ class SettingsProvider extends ChangeNotifier {
 
   // Cycles
   late int _longBreakInterval;
+  late int _totalLifetimeSessions;
 
   // Automation
   late bool _autoStartBreaks;
@@ -28,6 +29,7 @@ class SettingsProvider extends ChangeNotifier {
   int get shortBreakDuration => _shortBreakDuration;
   int get longBreakDuration => _longBreakDuration;
   int get longBreakInterval => _longBreakInterval;
+  int get totalLifetimeSessions => _totalLifetimeSessions;
   bool get autoStartBreaks => _autoStartBreaks;
   bool get autoStartFocus => _autoStartFocus;
   bool get soundEnabled => _soundEnabled;
@@ -40,6 +42,7 @@ class SettingsProvider extends ChangeNotifier {
     _longBreakDuration = _prefs.getInt('longBreakDuration') ?? 30;
 
     _longBreakInterval = _prefs.getInt('longBreakInterval') ?? 4;
+    _totalLifetimeSessions = _prefs.getInt('totalLifetimeSessions') ?? 0;
 
     _autoStartBreaks = _prefs.getBool('autoStartBreaks') ?? false;
     _autoStartFocus = _prefs.getBool('autoStartFocus') ?? false;
@@ -72,6 +75,12 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setLongBreakInterval(int count) async {
     _longBreakInterval = count;
     await _prefs.setInt('longBreakInterval', count);
+    notifyListeners();
+  }
+
+  Future<void> incrementLifetimeSessions() async {
+    _totalLifetimeSessions++;
+    await _prefs.setInt('totalLifetimeSessions', _totalLifetimeSessions);
     notifyListeners();
   }
 
