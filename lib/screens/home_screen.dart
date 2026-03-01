@@ -567,7 +567,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           label: 'Start Again',
           onPressed: () {
             _timer.reset();
-            _timer.start();
           },
         );
 
