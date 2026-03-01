@@ -295,6 +295,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         const SizedBox(height: 12),
         SessionDots(
           completedSessions: _timer.completedSessions,
+          totalSessions: settingsProvider.longBreakInterval,
           phase: _timer.phase,
         ),
         const Spacer(flex: 1),
@@ -367,6 +368,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               const SizedBox(height: 12),
               SessionDots(
                 completedSessions: _timer.completedSessions,
+                totalSessions: settingsProvider.longBreakInterval,
                 phase: _timer.phase,
               ),
               const SizedBox(height: 28),

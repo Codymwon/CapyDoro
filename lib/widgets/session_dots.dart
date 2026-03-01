@@ -4,11 +4,13 @@ import '../models/pomodoro_state.dart';
 
 class SessionDots extends StatelessWidget {
   final int completedSessions;
+  final int totalSessions;
   final PomodoroPhase phase;
 
   const SessionDots({
     super.key,
     required this.completedSessions,
+    required this.totalSessions,
     required this.phase,
   });
 
@@ -16,7 +18,7 @@ class SessionDots extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(4, (index) {
+      children: List.generate(totalSessions, (index) {
         final isCompleted = index < completedSessions;
         final isActive =
             index == completedSessions && phase == PomodoroPhase.focus;
