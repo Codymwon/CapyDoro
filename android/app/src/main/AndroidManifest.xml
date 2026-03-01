@@ -9,6 +9,11 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
+        <!-- Custom Notification Icon for Foreground Service -->
+        <meta-data
+            android:name="com.capydoro.notification.icon"
+            android:resource="@drawable/ic_notification" />
+            
         <!-- Foreground Service Declaration -->
         <service 
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"

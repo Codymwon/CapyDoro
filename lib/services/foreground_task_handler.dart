@@ -47,6 +47,9 @@ class TimerTaskHandler extends TaskHandler {
       FlutterForegroundTask.updateService(
         notificationTitle: 'Phase Complete! 🎉',
         notificationText: 'Tap to return to CapyDoro.',
+        notificationButtons: [
+          const NotificationButton(id: 'btn_skip', text: 'Next Phase'),
+        ],
       );
 
       FlutterForegroundTask.sendDataToMain({'action': 'phase_complete'});
@@ -72,7 +75,12 @@ class TimerTaskHandler extends TaskHandler {
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {}
 
   @override
-  void onNotificationButtonPressed(String id) {}
+  void onNotificationButtonPressed(String id) {
+    FlutterForegroundTask.sendDataToMain({
+      'action': 'button_pressed',
+      'id': id,
+    });
+  }
 
   @override
   void onNotificationPressed() {

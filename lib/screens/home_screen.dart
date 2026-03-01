@@ -67,11 +67,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _onReceiveTaskData(Object data) {
     if (data is Map<String, dynamic>) {
       if (data['action'] == 'phase_complete') {
-        // Just let the app know to run the completion logic by ensuring timer finishes
         if (_timer.isRunning) {
-          // If we receive this while not paused, the UI will just naturally check endTime
-          // on resume, but we can also trigger a re-render.
           setState(() {});
+        }
+      } else if (data['action'] == 'button_pressed') {
+        final id = data['id'];
+        if (id == 'btn_pause') {
+          _timer.pause();
+          _updateForegroundService();
+        } else if (id == 'btn_resume') {
+          _timer.start();
+          _updateForegroundService();
+        } else if (id == 'btn_skip') {
+          _timer.skip();
+          if (_timer.phase == PomodoroPhase.completed) {
+            _stopForegroundService();
+          } else {
+            _updateForegroundService();
+          }
+        } else if (id == 'btn_reset') {
+          _timer.reset();
+          _stopForegroundService();
         }
       }
     }
@@ -80,35 +96,82 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      // App went to background
       if (_timer.isRunning && _timer.endTime != null) {
         _startForegroundService();
       }
     } else if (state == AppLifecycleState.resumed) {
-      // App came to foreground
       _stopForegroundService();
-      // Force UI to sync with the current real time
       setState(() {});
     }
   }
 
   Future<void> _startForegroundService() async {
+    final buttons = [
+      NotificationButton(
+        id: _timer.isRunning ? 'btn_pause' : 'btn_resume',
+        text: _timer.isRunning ? 'Pause' : 'Resume',
+      ),
+      const NotificationButton(id: 'btn_skip', text: 'Skip'),
+      const NotificationButton(id: 'btn_reset', text: 'Reset'),
+    ];
+
+    const icon = NotificationIcon(
+      metaDataName: 'com.capydoro.notification.icon',
+      backgroundColor: Colors.brown,
+    );
+
     if (await FlutterForegroundTask.isRunningService) {
-      await FlutterForegroundTask.restartService();
+      await FlutterForegroundTask.updateService(
+        notificationTitle: _timer.phase.label,
+        notificationText: 'Pomodoro timer running',
+        notificationIcon: icon,
+        notificationButtons: buttons,
+      );
     } else {
       await FlutterForegroundTask.startService(
         serviceId: 100,
         notificationTitle: _timer.phase.label,
         notificationText: 'Pomodoro timer running',
+        notificationIcon: icon,
+        notificationButtons: buttons,
         callback: startCallback,
       );
     }
 
-    // Send data to the background isolate
     FlutterForegroundTask.sendDataToTask({
-      'endTimeMillis': _timer.endTime!.millisecondsSinceEpoch,
+      'endTimeMillis': _timer.endTime?.millisecondsSinceEpoch ?? 0,
       'phaseLabel': _timer.phase.label,
     });
+  }
+
+  Future<void> _updateForegroundService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      final buttons = [
+        NotificationButton(
+          id: _timer.isRunning ? 'btn_pause' : 'btn_resume',
+          text: _timer.isRunning ? 'Pause' : 'Resume',
+        ),
+        const NotificationButton(id: 'btn_skip', text: 'Skip'),
+        const NotificationButton(id: 'btn_reset', text: 'Reset'),
+      ];
+
+      const icon = NotificationIcon(
+        metaDataName: 'com.capydoro.notification.icon',
+        backgroundColor: Colors.brown,
+      );
+
+      await FlutterForegroundTask.updateService(
+        notificationTitle: _timer.phase.label,
+        notificationText: 'Pomodoro timer running',
+        notificationIcon: icon,
+        notificationButtons: buttons,
+      );
+
+      FlutterForegroundTask.sendDataToTask({
+        'endTimeMillis': _timer.endTime?.millisecondsSinceEpoch ?? 0,
+        'phaseLabel': _timer.phase.label,
+      });
+    }
   }
 
   Future<void> _stopForegroundService() async {
