@@ -7,6 +7,7 @@
     <application
         android:label="capydoro"
         android:name="${applicationName}"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher">
         
         <!-- Custom Notification Icon for Foreground Service -->
