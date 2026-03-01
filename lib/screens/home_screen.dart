@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/pomodoro_state.dart';
 import '../providers/timer_provider.dart';
-import '../theme/app_colors.dart';
 import '../widgets/timer_ring.dart';
 import '../widgets/capybara_face.dart';
 import '../widgets/action_button.dart';
 import '../widgets/session_dots.dart';
 import '../widgets/timer_bar.dart';
+import '../main.dart' show themeProvider;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,13 +43,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isLandscape ? 48 : 32,
-              vertical: isLandscape ? 16 : 0,
+        child: Stack(
+          children: [
+            Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isLandscape ? 48 : 32,
+                  vertical: isLandscape ? 16 : 0,
+                ),
+                child: isLandscape ? _buildLandscape() : _buildPortrait(),
+              ),
             ),
-            child: isLandscape ? _buildLandscape() : _buildPortrait(),
+            _buildThemeToggle(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeToggle() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = Theme.of(context).colorScheme.secondary;
+
+    return Positioned(
+      top: 12,
+      right: 16,
+      child: GestureDetector(
+        onTap: () => themeProvider.toggle(),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            transitionBuilder: (child, animation) {
+              return RotationTransition(
+                turns: Tween(begin: 0.75, end: 1.0).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
+              );
+            },
+            child: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              key: ValueKey(isDark),
+              size: 22,
+              color: iconColor,
+            ),
           ),
         ),
       ),
@@ -77,6 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLandscape() {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ??
+        Theme.of(context).colorScheme.onSurface;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -102,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: GoogleFonts.nunito(
                   fontSize: 52,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: textColor,
                   letterSpacing: 3,
                 ),
               ),
@@ -128,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: GoogleFonts.nunito(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ),
@@ -155,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: GoogleFonts.nunito(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: AppColors.secondary,
+            color: Theme.of(context).colorScheme.secondary,
             letterSpacing: 1.5,
           ),
         ),
@@ -168,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: GoogleFonts.nunito(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ),
@@ -179,6 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTimerRing(double size) {
     final imgSize = size * 0.42;
     final fontSize = size > 200 ? 44.0 : 32.0;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ??
+        Theme.of(context).colorScheme.onSurface;
 
     return SizedBox(
       width: size,
@@ -205,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: GoogleFonts.nunito(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: textColor,
                 letterSpacing: 3,
               ),
             ),
@@ -274,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'Reset',
                   onPressed: () => _timer.reset(),
                   isPrimary: false,
-                  foregroundColor: AppColors.danger,
+                  foregroundColor: Theme.of(context).colorScheme.error,
                 ),
               ],
             ),
