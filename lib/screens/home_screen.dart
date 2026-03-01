@@ -191,8 +191,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (_timer.phase != PomodoroPhase.focus &&
         _timer.phase != PomodoroPhase.idle) {
       final lifeTime = settingsProvider.totalLifetimeSessions;
-      // Prompt at 10 sessions, 50 sessions, etc.
-      if (lifeTime > 0 && (lifeTime == 5 || lifeTime % 20 == 0)) {
+      // Prompt at 8 sessions initially, then every 20 sessions after
+      if (lifeTime > 0 && (lifeTime == 8 || lifeTime % 20 == 0)) {
         _showTipJarPromptLocked(lifeTime);
       }
     }
@@ -232,17 +232,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Maybe later'),
-                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -254,7 +251,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         MaterialPageRoute(builder: (_) => const TipJarScreen()),
                       );
                     },
-                    child: const Text('Support the Capybara ☕'),
+                    child: const Text(
+                      'Support the Capybara ☕',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Maybe later'),
                   ),
                 ],
               ),
