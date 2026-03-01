@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/pomodoro_state.dart';
 import '../providers/timer_provider.dart';
+import '../services/foreground_task_handler.dart';
 import '../widgets/timer_ring.dart';
 import '../widgets/capybara_face.dart';
 import '../widgets/action_button.dart';
@@ -16,13 +19,102 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final TimerProvider _timer = TimerProvider();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _timer.addListener(_onTimerUpdate);
+
+    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _requestPermissions();
+      _initForegroundTask();
+    });
+  }
+
+  Future<void> _requestPermissions() async {
+    final notificationPermission =
+        await FlutterForegroundTask.checkNotificationPermission();
+    if (notificationPermission != NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
+    }
+  }
+
+  void _initForegroundTask() {
+    FlutterForegroundTask.init(
+      androidNotificationOptions: AndroidNotificationOptions(
+        channelId: 'timer_service',
+        channelName: 'CapyDoro Timer',
+        channelDescription: 'Keeps the timer running in the background',
+        onlyAlertOnce: true,
+      ),
+      iosNotificationOptions: const IOSNotificationOptions(
+        showNotification: false,
+        playSound: false,
+      ),
+      foregroundTaskOptions: ForegroundTaskOptions(
+        eventAction: ForegroundTaskEventAction.repeat(1000),
+        autoRunOnBoot: false,
+        allowWakeLock: true,
+      ),
+    );
+  }
+
+  void _onReceiveTaskData(Object data) {
+    if (data is Map<String, dynamic>) {
+      if (data['action'] == 'phase_complete') {
+        // Just let the app know to run the completion logic by ensuring timer finishes
+        if (_timer.isRunning) {
+          // If we receive this while not paused, the UI will just naturally check endTime
+          // on resume, but we can also trigger a re-render.
+          setState(() {});
+        }
+      }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // App went to background
+      if (_timer.isRunning && _timer.endTime != null) {
+        _startForegroundService();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      // App came to foreground
+      _stopForegroundService();
+      // Force UI to sync with the current real time
+      setState(() {});
+    }
+  }
+
+  Future<void> _startForegroundService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      await FlutterForegroundTask.restartService();
+    } else {
+      await FlutterForegroundTask.startService(
+        serviceId: 100,
+        notificationTitle: _timer.phase.label,
+        notificationText: 'Pomodoro timer running',
+        callback: startCallback,
+      );
+    }
+
+    // Send data to the background isolate
+    FlutterForegroundTask.sendDataToTask({
+      'endTimeMillis': _timer.endTime!.millisecondsSinceEpoch,
+      'phaseLabel': _timer.phase.label,
+    });
+  }
+
+  Future<void> _stopForegroundService() async {
+    if (await FlutterForegroundTask.isRunningService) {
+      await FlutterForegroundTask.stopService();
+    }
   }
 
   void _onTimerUpdate() {
@@ -31,6 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
     _timer.removeListener(_onTimerUpdate);
     _timer.dispose();
     super.dispose();

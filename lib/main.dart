@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'providers/theme_provider.dart';
@@ -9,6 +10,9 @@ final themeProvider = ThemeProvider();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize port for communication between TaskHandler and UI.
+  FlutterForegroundTask.initCommunicationPort();
 
   // Initial status bar style (light mode)
   _updateSystemUI(false);

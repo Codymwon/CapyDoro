@@ -9,6 +9,7 @@ class TimerProvider extends ChangeNotifier {
   int _sessionCount = 0; // completed focus sessions (0–4)
   bool _isRunning = false;
   Timer? _timer;
+  DateTime? _endTime; // Added for background service calculation
 
   // Getters
   PomodoroPhase get phase => _phase;
@@ -17,6 +18,7 @@ class TimerProvider extends ChangeNotifier {
   int get sessionCount => _sessionCount;
   bool get isRunning => _isRunning;
   int get completedSessions => _sessionCount;
+  DateTime? get endTime => _endTime;
 
   double get progress {
     if (_totalSeconds == 0) return 0.0;
@@ -38,23 +40,40 @@ class TimerProvider extends ChangeNotifier {
     if (_remainingSeconds <= 0) return;
 
     _isRunning = true;
+    _endTime = DateTime.now().add(Duration(seconds: _remainingSeconds));
     notifyListeners();
 
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_remainingSeconds > 0) {
-        _remainingSeconds--;
-        notifyListeners();
-      } else {
-        _onPhaseComplete();
-      }
+      _tick();
     });
+  }
+
+  void _tick() {
+    if (_endTime == null) return;
+
+    final remaining = _endTime!.difference(DateTime.now()).inSeconds;
+
+    if (remaining > 0) {
+      _remainingSeconds = remaining;
+      notifyListeners();
+    } else {
+      _onPhaseComplete();
+    }
   }
 
   /// Pause the timer
   void pause() {
     _timer?.cancel();
     _isRunning = false;
+
+    if (_endTime != null) {
+      // Recalculate precisely how much is left so we can resume accurately
+      final diff = _endTime!.difference(DateTime.now()).inSeconds;
+      _remainingSeconds = diff > 0 ? diff : 0;
+      _endTime = null;
+    }
+
     notifyListeners();
   }
 
