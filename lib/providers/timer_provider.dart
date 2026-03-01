@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 import '../models/pomodoro_state.dart';
 import 'settings_provider.dart';
 import '../services/audio_service.dart';
@@ -150,7 +150,7 @@ class TimerProvider extends ChangeNotifier {
           AudioService().playWorkToBreak();
         }
         if (_settings.vibrateEnabled) {
-          HapticFeedback.heavyImpact();
+          Vibration.vibrate(pattern: [0, 500, 200, 500]);
         }
 
         if (_sessionCount >= _settings.longBreakInterval) {
@@ -174,7 +174,7 @@ class TimerProvider extends ChangeNotifier {
           AudioService().playBreakToWork();
         }
         if (_settings.vibrateEnabled) {
-          HapticFeedback.heavyImpact();
+          Vibration.vibrate(pattern: [0, 500, 200, 500]);
         }
 
         // Back to focus
@@ -192,7 +192,7 @@ class TimerProvider extends ChangeNotifier {
           AudioService().playCompletion();
         }
         if (_settings.vibrateEnabled) {
-          HapticFeedback.heavyImpact();
+          Vibration.vibrate(pattern: [0, 500, 200, 500]);
         }
 
         // All done!

@@ -45,7 +45,7 @@ class SettingsProvider extends ChangeNotifier {
     _autoStartFocus = _prefs.getBool('autoStartFocus') ?? false;
 
     _soundEnabled = _prefs.getBool('soundEnabled') ?? true;
-    _vibrateEnabled = _prefs.getBool('vibrateEnabled') ?? true;
+    _vibrateEnabled = _prefs.getBool('vibrateEnabled') ?? false;
 
     _themeMode = _prefs.getString('themeMode') ?? 'system';
   }
