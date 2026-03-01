@@ -267,11 +267,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildActionButtons() {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      switchInCurve: Curves.easeIn,
-      switchOutCurve: Curves.easeOut,
-      child: _buildActionContent(),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeIn,
+        switchOutCurve: Curves.easeOut,
+        child: _buildActionContent(),
+      ),
     );
   }
 
@@ -298,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case PomodoroPhase.shortBreak:
       case PomodoroPhase.longBreak:
         return Column(
-          key: ValueKey('running_${_timer.isRunning}'),
+          key: const ValueKey('running'),
           mainAxisSize: MainAxisSize.min,
           children: [
             ActionButton(
