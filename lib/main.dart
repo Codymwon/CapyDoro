@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'providers/theme_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 
-final themeProvider = ThemeProvider();
+late final SettingsProvider settingsProvider;
+late final ThemeProvider themeProvider;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load shared preferences before app start so it's synchronous
+  final prefs = await SharedPreferences.getInstance();
+  settingsProvider = SettingsProvider(prefs);
+  themeProvider = ThemeProvider(settingsProvider);
 
   // Initialize port for communication between TaskHandler and UI.
   FlutterForegroundTask.initCommunicationPort();

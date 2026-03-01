@@ -1,15 +1,30 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/pomodoro_state.dart';
+import 'settings_provider.dart';
+import '../services/audio_service.dart';
 
 class TimerProvider extends ChangeNotifier {
+  final SettingsProvider _settings;
   PomodoroPhase _phase = PomodoroPhase.idle;
   int _remainingSeconds = 0;
   int _totalSeconds = 0;
-  int _sessionCount = 0; // completed focus sessions (0–4)
+  int _sessionCount = 0; // completed focus sessions
   bool _isRunning = false;
   Timer? _timer;
-  DateTime? _endTime; // Added for background service calculation
+  DateTime? _endTime;
+
+  TimerProvider(this._settings) {
+    _setDurationForPhase(_phase);
+    _settings.addListener(_onSettingsChanged);
+  }
+
+  void _onSettingsChanged() {
+    if (_phase == PomodoroPhase.idle) {
+      _setDurationForPhase(_phase);
+      notifyListeners();
+    }
+  }
 
   // Getters
   PomodoroPhase get phase => _phase;
@@ -97,11 +112,27 @@ class TimerProvider extends ChangeNotifier {
 
   void _startFocusSession() {
     _phase = PomodoroPhase.focus;
-    _setDuration(_phase.duration);
+    _setDurationForPhase(_phase);
   }
 
-  void _setDuration(Duration duration) {
-    _totalSeconds = duration.inSeconds;
+  void _setDurationForPhase(PomodoroPhase phase) {
+    int minutes;
+    switch (phase) {
+      case PomodoroPhase.focus:
+      case PomodoroPhase.idle:
+        minutes = _settings.focusDuration;
+        break;
+      case PomodoroPhase.shortBreak:
+        minutes = _settings.shortBreakDuration;
+        break;
+      case PomodoroPhase.longBreak:
+        minutes = _settings.longBreakDuration;
+        break;
+      case PomodoroPhase.completed:
+        minutes = 0;
+        break;
+    }
+    _totalSeconds = minutes * 60;
     _remainingSeconds = _totalSeconds;
   }
 
@@ -112,29 +143,44 @@ class TimerProvider extends ChangeNotifier {
     switch (_phase) {
       case PomodoroPhase.focus:
         _sessionCount++;
-        if (_sessionCount >= 4) {
-          // After 4 focus sessions → long break
+
+        // Play sound for finishing focus and entering break
+        AudioService().playWorkToBreak();
+
+        if (_sessionCount >= _settings.longBreakInterval) {
+          // After required focus sessions → long break
           _phase = PomodoroPhase.longBreak;
-          _setDuration(_phase.duration);
+          _setDurationForPhase(_phase);
         } else {
           // Short break
           _phase = PomodoroPhase.shortBreak;
-          _setDuration(_phase.duration);
+          _setDurationForPhase(_phase);
         }
-        // Auto-start the break
+
         notifyListeners();
-        start();
+        if (_settings.autoStartBreaks) {
+          start();
+        }
         break;
 
       case PomodoroPhase.shortBreak:
+        // Play sound for finishing break and entering work
+        AudioService().playBreakToWork();
+
         // Back to focus
         _phase = PomodoroPhase.focus;
-        _setDuration(_phase.duration);
+        _setDurationForPhase(_phase);
+
         notifyListeners();
-        start();
+        if (_settings.autoStartFocus) {
+          start();
+        }
         break;
 
       case PomodoroPhase.longBreak:
+        // Play sound for completing the entire cycle
+        AudioService().playCompletion();
+
         // All done!
         _phase = PomodoroPhase.completed;
         _remainingSeconds = 0;
@@ -152,6 +198,7 @@ class TimerProvider extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    _settings.removeListener(_onSettingsChanged);
     super.dispose();
   }
 }

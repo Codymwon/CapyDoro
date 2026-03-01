@@ -10,7 +10,8 @@ import '../widgets/capybara_face.dart';
 import '../widgets/action_button.dart';
 import '../widgets/session_dots.dart';
 import '../widgets/timer_bar.dart';
-import '../main.dart' show themeProvider;
+import '../main.dart' show themeProvider, settingsProvider;
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,13 +21,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final TimerProvider _timer = TimerProvider();
+  late final TimerProvider _timer;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _timer = TimerProvider(settingsProvider);
     _timer.addListener(_onTimerUpdate);
+    WidgetsBinding.instance.addObserver(this);
 
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
 
@@ -212,6 +214,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
             _buildThemeToggle(),
+            _buildSettingsButton(),
           ],
         ),
       ),
@@ -252,6 +255,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               color: iconColor,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton() {
+    final iconColor = Theme.of(context).colorScheme.secondary;
+
+    return Positioned(
+      top: 12,
+      left: 16,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsScreen()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(Icons.settings_rounded, size: 22, color: iconColor),
         ),
       ),
     );
@@ -299,9 +329,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               const SizedBox(height: 12),
               Text(
-                _timer.phase == PomodoroPhase.idle
-                    ? '25:00'
-                    : _timer.phase == PomodoroPhase.completed
+                _timer.phase == PomodoroPhase.completed
                     ? '00:00'
                     : _timer.timeDisplay,
                 style: GoogleFonts.nunito(
@@ -405,9 +433,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             const SizedBox(height: 4),
             Text(
-              _timer.phase == PomodoroPhase.idle
-                  ? '25:00'
-                  : _timer.phase == PomodoroPhase.completed
+              _timer.phase == PomodoroPhase.completed
                   ? '00:00'
                   : _timer.timeDisplay,
               style: GoogleFonts.nunito(
