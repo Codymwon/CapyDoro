@@ -16,6 +16,10 @@ class SettingsProvider extends ChangeNotifier {
   late bool _autoStartBreaks;
   late bool _autoStartFocus;
 
+  // Notifications
+  late bool _soundEnabled;
+  late bool _vibrateEnabled;
+
   // Theme
   late String _themeMode; // 'system', 'light', 'dark'
 
@@ -26,6 +30,8 @@ class SettingsProvider extends ChangeNotifier {
   int get longBreakInterval => _longBreakInterval;
   bool get autoStartBreaks => _autoStartBreaks;
   bool get autoStartFocus => _autoStartFocus;
+  bool get soundEnabled => _soundEnabled;
+  bool get vibrateEnabled => _vibrateEnabled;
   String get themeMode => _themeMode;
 
   SettingsProvider(this._prefs) {
@@ -37,6 +43,9 @@ class SettingsProvider extends ChangeNotifier {
 
     _autoStartBreaks = _prefs.getBool('autoStartBreaks') ?? false;
     _autoStartFocus = _prefs.getBool('autoStartFocus') ?? false;
+
+    _soundEnabled = _prefs.getBool('soundEnabled') ?? true;
+    _vibrateEnabled = _prefs.getBool('vibrateEnabled') ?? true;
 
     _themeMode = _prefs.getString('themeMode') ?? 'system';
   }
@@ -81,6 +90,18 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setThemeMode(String mode) async {
     _themeMode = mode;
     await _prefs.setString('themeMode', mode);
+    notifyListeners();
+  }
+
+  Future<void> setSoundEnabled(bool value) async {
+    _soundEnabled = value;
+    await _prefs.setBool('soundEnabled', value);
+    notifyListeners();
+  }
+
+  Future<void> setVibrateEnabled(bool value) async {
+    _vibrateEnabled = value;
+    await _prefs.setBool('vibrateEnabled', value);
     notifyListeners();
   }
 }

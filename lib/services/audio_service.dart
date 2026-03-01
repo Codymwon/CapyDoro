@@ -7,7 +7,8 @@ class AudioService {
   final AudioPlayer _player = AudioPlayer();
 
   AudioService._internal() {
-    // Pre-configure the audio player context if needed (e.g. for background)
+    // Override the default 'assets/' prefix because our folder is 'Assets/'
+    _player.audioCache = AudioCache(prefix: 'Assets/');
     _player.setReleaseMode(ReleaseMode.stop);
   }
 

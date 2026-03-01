@@ -84,6 +84,23 @@ class SettingsScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 24),
+              _buildSectionHeader(context, 'NOTIFICATIONS & ALERTS'),
+              _buildSwitch(
+                context,
+                title: 'Sound Alerts',
+                subtitle: 'Play a chime when a timer finishes',
+                value: settingsProvider.soundEnabled,
+                onChanged: settingsProvider.setSoundEnabled,
+              ),
+              _buildSwitch(
+                context,
+                title: 'Vibrate',
+                subtitle: 'Vibrate the phone when a timer finishes',
+                value: settingsProvider.vibrateEnabled,
+                onChanged: settingsProvider.setVibrateEnabled,
+              ),
+
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'APPEARANCE'),
               _buildThemeSelector(context),
               const SizedBox(height: 48), // Bottom padding
@@ -231,7 +248,7 @@ class SettingsScreen extends StatelessWidget {
       subtitle: Text(
         subtitle,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
+          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
         ),
       ),
       value: value,

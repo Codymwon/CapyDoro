@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import '../models/pomodoro_state.dart';
 import 'settings_provider.dart';
 import '../services/audio_service.dart';
@@ -145,7 +146,12 @@ class TimerProvider extends ChangeNotifier {
         _sessionCount++;
 
         // Play sound for finishing focus and entering break
-        AudioService().playWorkToBreak();
+        if (_settings.soundEnabled) {
+          AudioService().playWorkToBreak();
+        }
+        if (_settings.vibrateEnabled) {
+          HapticFeedback.heavyImpact();
+        }
 
         if (_sessionCount >= _settings.longBreakInterval) {
           // After required focus sessions → long break
@@ -164,8 +170,12 @@ class TimerProvider extends ChangeNotifier {
         break;
 
       case PomodoroPhase.shortBreak:
-        // Play sound for finishing break and entering work
-        AudioService().playBreakToWork();
+        if (_settings.soundEnabled) {
+          AudioService().playBreakToWork();
+        }
+        if (_settings.vibrateEnabled) {
+          HapticFeedback.heavyImpact();
+        }
 
         // Back to focus
         _phase = PomodoroPhase.focus;
@@ -178,8 +188,12 @@ class TimerProvider extends ChangeNotifier {
         break;
 
       case PomodoroPhase.longBreak:
-        // Play sound for completing the entire cycle
-        AudioService().playCompletion();
+        if (_settings.soundEnabled) {
+          AudioService().playCompletion();
+        }
+        if (_settings.vibrateEnabled) {
+          HapticFeedback.heavyImpact();
+        }
 
         // All done!
         _phase = PomodoroPhase.completed;
