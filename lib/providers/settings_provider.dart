@@ -44,7 +44,7 @@ class SettingsProvider extends ChangeNotifier {
     _longBreakInterval = _prefs.getInt('longBreakInterval') ?? 4;
     _totalLifetimeSessions = _prefs.getInt('totalLifetimeSessions') ?? 0;
 
-    _autoStartBreaks = _prefs.getBool('autoStartBreaks') ?? false;
+    _autoStartBreaks = _prefs.getBool('autoStartBreaks') ?? true;
     _autoStartFocus = _prefs.getBool('autoStartFocus') ?? false;
 
     _soundEnabled = _prefs.getBool('soundEnabled') ?? true;
