@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../main.dart' show settingsProvider, themeProvider;
+import '../services/dnd_service.dart';
 import 'tip_jar_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -84,6 +85,13 @@ class SettingsScreen extends StatelessWidget {
                 value: settingsProvider.autoStartFocus,
                 onChanged: settingsProvider.setAutoStartFocus,
               ),
+              _buildSwitch(
+                context,
+                title: 'Focus Mode DND (Android)',
+                subtitle: 'Silence notifications during focus sessions',
+                value: settingsProvider.dndEnabled,
+                onChanged: (val) => _handleDndToggle(context, val),
+              ),
 
               const SizedBox(height: 24),
               _buildSectionHeader(context, 'NOTIFICATIONS & ALERTS'),
@@ -102,6 +110,18 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: settingsProvider.setVibrateEnabled,
               ),
 
+              const SizedBox(height: 24),
+              _buildSectionHeader(context, 'DISPLAY'),
+              _buildSwitch(
+                context,
+                title: 'Keep Screen Awake',
+                subtitle:
+                    'Prevent the screen from turning off while a timer is running',
+                value: settingsProvider.keepAwake,
+                onChanged: settingsProvider.setKeepAwake,
+              ),
+
+              const SizedBox(height: 24),
               _buildSectionHeader(context, 'SUPPORT'),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -352,5 +372,46 @@ class SettingsScreen extends StatelessWidget {
         selectedBackgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
+  }
+
+  Future<void> _handleDndToggle(BuildContext context, bool value) async {
+    if (!value) {
+      // Turning off is always allowed
+      settingsProvider.setDndEnabled(false);
+      return;
+    }
+
+    // Trying to turn ON -> check permission
+    final hasPermission = await DndService.isPermissionGranted();
+    if (hasPermission) {
+      settingsProvider.setDndEnabled(true);
+    } else {
+      // Note: We need to use a captured BuildContext or ensure it's mounted
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Permission Required'),
+          content: const Text(
+            'CapyDoro needs "Do Not Disturb" access to silence notifications during focus sessions.\n\n'
+            'Please grant this in your device settings.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                DndService.openPermissionSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

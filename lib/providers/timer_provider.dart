@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vibration/vibration.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../models/pomodoro_state.dart';
 import 'settings_provider.dart';
 import 'stats_provider.dart';
 import '../services/audio_service.dart';
+import '../services/dnd_service.dart';
 
 class TimerProvider extends ChangeNotifier {
   final SettingsProvider _settings;
@@ -26,7 +28,16 @@ class TimerProvider extends ChangeNotifier {
   void _onSettingsChanged() {
     if (_phase == PomodoroPhase.idle) {
       _setDurationForPhase(_phase);
-      notifyListeners();
+    }
+    _updateWakelock();
+    notifyListeners();
+  }
+
+  void _updateWakelock() {
+    if (_isRunning && _settings.keepAwake) {
+      WakelockPlus.enable();
+    } else {
+      WakelockPlus.disable();
     }
   }
 
@@ -60,6 +71,7 @@ class TimerProvider extends ChangeNotifier {
 
     _isRunning = true;
     _endTime = DateTime.now().add(Duration(seconds: _remainingSeconds));
+    _updateWakelock();
     notifyListeners();
 
     _timer?.cancel();
@@ -94,6 +106,11 @@ class TimerProvider extends ChangeNotifier {
       _endTime = null;
     }
 
+    if (_settings.dndEnabled) {
+      DndService.setDndOff();
+    }
+
+    _updateWakelock();
     notifyListeners();
   }
 
@@ -102,6 +119,11 @@ class TimerProvider extends ChangeNotifier {
     _timer?.cancel();
     _isRunning = false;
     _skipped = true;
+
+    if (_settings.dndEnabled) {
+      DndService.setDndOff();
+    }
+
     _onPhaseComplete();
   }
 
@@ -112,12 +134,22 @@ class TimerProvider extends ChangeNotifier {
     _sessionCount = 0;
     _isRunning = false;
     _setDurationForPhase(_phase);
+
+    if (_settings.dndEnabled) {
+      DndService.setDndOff();
+    }
+
+    _updateWakelock();
     notifyListeners();
   }
 
   void _startFocusSession() {
     _phase = PomodoroPhase.focus;
     _setDurationForPhase(_phase);
+
+    if (_settings.dndEnabled) {
+      DndService.setDndOn();
+    }
   }
 
   void _setDurationForPhase(PomodoroPhase phase) {
@@ -171,6 +203,10 @@ class TimerProvider extends ChangeNotifier {
           _setDurationForPhase(_phase);
         }
 
+        if (_settings.dndEnabled) {
+          DndService.setDndOff();
+        }
+
         notifyListeners();
         if (_settings.autoStartBreaks) {
           start();
@@ -208,6 +244,7 @@ class TimerProvider extends ChangeNotifier {
         _remainingSeconds = 0;
         _totalSeconds = 0;
         _sessionCount = 0;
+        _updateWakelock();
         notifyListeners();
         break;
 
@@ -222,6 +259,7 @@ class TimerProvider extends ChangeNotifier {
   void dispose() {
     _timer?.cancel();
     _settings.removeListener(_onSettingsChanged);
+    WakelockPlus.disable();
     super.dispose();
   }
 }

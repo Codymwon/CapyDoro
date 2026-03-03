@@ -16,6 +16,7 @@ class SettingsProvider extends ChangeNotifier {
   // Automation
   late bool _autoStartBreaks;
   late bool _autoStartFocus;
+  late bool _dndEnabled;
 
   // Notifications
   late bool _soundEnabled;
@@ -23,6 +24,9 @@ class SettingsProvider extends ChangeNotifier {
 
   // Theme
   late String _themeMode; // 'system', 'light', 'dark'
+
+  // Screen
+  late bool _keepAwake;
 
   // Getters
   int get focusDuration => _focusDuration;
@@ -32,9 +36,11 @@ class SettingsProvider extends ChangeNotifier {
   int get totalLifetimeSessions => _totalLifetimeSessions;
   bool get autoStartBreaks => _autoStartBreaks;
   bool get autoStartFocus => _autoStartFocus;
+  bool get dndEnabled => _dndEnabled;
   bool get soundEnabled => _soundEnabled;
   bool get vibrateEnabled => _vibrateEnabled;
   String get themeMode => _themeMode;
+  bool get keepAwake => _keepAwake;
 
   SettingsProvider(this._prefs) {
     _focusDuration = _prefs.getInt('focusDuration') ?? 25;
@@ -46,11 +52,14 @@ class SettingsProvider extends ChangeNotifier {
 
     _autoStartBreaks = _prefs.getBool('autoStartBreaks') ?? true;
     _autoStartFocus = _prefs.getBool('autoStartFocus') ?? false;
+    _dndEnabled = _prefs.getBool('dndEnabled') ?? false;
 
     _soundEnabled = _prefs.getBool('soundEnabled') ?? true;
     _vibrateEnabled = _prefs.getBool('vibrateEnabled') ?? false;
 
     _themeMode = _prefs.getString('themeMode') ?? 'system';
+
+    _keepAwake = _prefs.getBool('keepAwake') ?? true;
   }
 
   // Setters
@@ -96,6 +105,12 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> setDndEnabled(bool value) async {
+    _dndEnabled = value;
+    await _prefs.setBool('dndEnabled', value);
+    notifyListeners();
+  }
+
   Future<void> setThemeMode(String mode) async {
     _themeMode = mode;
     await _prefs.setString('themeMode', mode);
@@ -111,6 +126,12 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setVibrateEnabled(bool value) async {
     _vibrateEnabled = value;
     await _prefs.setBool('vibrateEnabled', value);
+    notifyListeners();
+  }
+
+  Future<void> setKeepAwake(bool value) async {
+    _keepAwake = value;
+    await _prefs.setBool('keepAwake', value);
     notifyListeners();
   }
 }

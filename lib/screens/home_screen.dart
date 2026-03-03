@@ -306,12 +306,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: isLandscape ? _buildLandscape() : _buildPortrait(),
               ),
             ),
-            _buildThemeToggle(),
-            _buildSettingsButton(),
-            _buildStatsButton(),
+            Positioned(top: 12, left: 16, right: 16, child: _buildTopNavBar()),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTopNavBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSettingsButton(),
+            const SizedBox(width: 12),
+            _buildStatsButton(),
+          ],
+        ),
+        _buildThemeToggle(),
+      ],
     );
   }
 
@@ -319,35 +334,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final iconColor = Theme.of(context).colorScheme.secondary;
 
-    return Positioned(
-      top: 12,
-      right: 16,
-      child: GestureDetector(
-        onTap: () => themeProvider.toggle(),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
-            transitionBuilder: (child, animation) {
-              return RotationTransition(
-                turns: Tween(begin: 0.75, end: 1.0).animate(animation),
-                child: FadeTransition(opacity: animation, child: child),
-              );
-            },
-            child: Icon(
-              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-              key: ValueKey(isDark),
-              size: 22,
-              color: iconColor,
-            ),
+    return GestureDetector(
+      onTap: () => themeProvider.toggle(),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          transitionBuilder: (child, animation) {
+            return RotationTransition(
+              turns: Tween(begin: 0.75, end: 1.0).animate(animation),
+              child: FadeTransition(opacity: animation, child: child),
+            );
+          },
+          child: Icon(
+            isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+            key: ValueKey(isDark),
+            size: 22,
+            color: iconColor,
           ),
         ),
       ),
@@ -357,26 +366,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildSettingsButton() {
     final iconColor = Theme.of(context).colorScheme.secondary;
 
-    return Positioned(
-      top: 12,
-      left: 16,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsScreen()),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(Icons.settings_rounded, size: 22, color: iconColor),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: Icon(Icons.settings_rounded, size: 22, color: iconColor),
       ),
     );
   }
@@ -384,26 +387,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildStatsButton() {
     final iconColor = Theme.of(context).colorScheme.secondary;
 
-    return Positioned(
-      top: 12,
-      left: 56,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const StatsScreen()),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(Icons.bar_chart_rounded, size: 22, color: iconColor),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const StatsScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(12),
         ),
+        child: Icon(Icons.bar_chart_rounded, size: 22, color: iconColor),
       ),
     );
   }
@@ -509,10 +506,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Text(
           'CapyDoro',
           style: GoogleFonts.nunito(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
+            fontSize: 36,
+            fontWeight: FontWeight.w900,
             color: Theme.of(context).colorScheme.secondary,
-            letterSpacing: 1.5,
+            letterSpacing: 2.0,
           ),
         ),
         const SizedBox(height: 8),
@@ -624,17 +621,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ActionButton(
-                  label: 'Skip',
+                ActionIconButton(
+                  icon: Icons.skip_next_rounded,
+                  tooltip: 'Skip',
                   onPressed: () => _timer.skip(),
-                  isPrimary: false,
+                  foregroundColor: Theme.of(context).colorScheme.secondary,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.secondary.withValues(alpha: 0.1),
                 ),
                 const SizedBox(width: 16),
-                ActionButton(
-                  label: 'Reset',
+                ActionIconButton(
+                  icon: Icons.restart_alt_rounded,
+                  tooltip: 'Reset',
                   onPressed: () => _timer.reset(),
-                  isPrimary: false,
                   foregroundColor: Theme.of(context).colorScheme.error,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.error.withValues(alpha: 0.1),
                 ),
               ],
             ),
