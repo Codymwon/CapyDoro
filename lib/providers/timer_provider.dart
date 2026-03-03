@@ -3,10 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:vibration/vibration.dart';
 import '../models/pomodoro_state.dart';
 import 'settings_provider.dart';
+import 'stats_provider.dart';
 import '../services/audio_service.dart';
 
 class TimerProvider extends ChangeNotifier {
   final SettingsProvider _settings;
+  final StatsProvider _stats;
   PomodoroPhase _phase = PomodoroPhase.idle;
   int _remainingSeconds = 0;
   int _totalSeconds = 0;
@@ -15,7 +17,7 @@ class TimerProvider extends ChangeNotifier {
   Timer? _timer;
   DateTime? _endTime;
 
-  TimerProvider(this._settings) {
+  TimerProvider(this._settings, this._stats) {
     _setDurationForPhase(_phase);
     _settings.addListener(_onSettingsChanged);
   }
@@ -145,6 +147,7 @@ class TimerProvider extends ChangeNotifier {
       case PomodoroPhase.focus:
         _sessionCount++;
         _settings.incrementLifetimeSessions();
+        _stats.logSession(_settings.focusDuration);
 
         // Play sound for finishing focus and entering break
         if (_settings.soundEnabled) {

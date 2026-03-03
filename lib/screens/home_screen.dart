@@ -9,8 +9,9 @@ import '../widgets/capybara_face.dart';
 import '../widgets/action_button.dart';
 import '../widgets/session_dots.dart';
 import '../widgets/timer_bar.dart';
-import '../main.dart' show themeProvider, settingsProvider;
+import '../main.dart' show themeProvider, settingsProvider, statsProvider;
 import 'settings_screen.dart';
+import 'stats_screen.dart';
 import 'tip_jar_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _timer = TimerProvider(settingsProvider);
+    _timer = TimerProvider(settingsProvider, statsProvider);
     _timer.addListener(_onTimerUpdate);
     WidgetsBinding.instance.addObserver(this);
 
@@ -303,6 +304,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             _buildThemeToggle(),
             _buildSettingsButton(),
+            _buildStatsButton(),
           ],
         ),
       ),
@@ -370,6 +372,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(Icons.settings_rounded, size: 22, color: iconColor),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsButton() {
+    final iconColor = Theme.of(context).colorScheme.secondary;
+
+    return Positioned(
+      top: 12,
+      left: 56,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const StatsScreen()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(Icons.bar_chart_rounded, size: 22, color: iconColor),
         ),
       ),
     );

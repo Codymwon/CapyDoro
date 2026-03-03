@@ -6,9 +6,11 @@ import 'theme/app_theme.dart';
 import 'theme/app_colors.dart';
 import 'providers/theme_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/stats_provider.dart';
 import 'screens/home_screen.dart';
 
 late final SettingsProvider settingsProvider;
+late final StatsProvider statsProvider;
 late final ThemeProvider themeProvider;
 
 void main() async {
@@ -17,6 +19,7 @@ void main() async {
   // Load shared preferences before app start so it's synchronous
   final prefs = await SharedPreferences.getInstance();
   settingsProvider = SettingsProvider(prefs);
+  statsProvider = StatsProvider(prefs);
   themeProvider = ThemeProvider(settingsProvider);
 
   // Initialize port for communication between TaskHandler and UI.
