@@ -94,7 +94,7 @@ class StatsScreen extends StatelessWidget {
     final cardColor = isDark ? const Color(0xFF2C2824) : Colors.white;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -109,18 +109,22 @@ class StatsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-          const Spacer(),
-          Text(
-            value,
-            style: GoogleFonts.nunito(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: valueColor ?? Theme.of(context).textTheme.bodyLarge?.color,
+          const SizedBox(height: 4),
+          Flexible(
+            child: Text(
+              value,
+              style: GoogleFonts.nunito(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color:
+                    valueColor ?? Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(

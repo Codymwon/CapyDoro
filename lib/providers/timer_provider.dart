@@ -108,10 +108,9 @@ class TimerProvider extends ChangeNotifier {
   void reset() {
     _timer?.cancel();
     _phase = PomodoroPhase.idle;
-    _remainingSeconds = 0;
-    _totalSeconds = 0;
     _sessionCount = 0;
     _isRunning = false;
+    _setDurationForPhase(_phase);
     notifyListeners();
   }
 
@@ -147,8 +146,8 @@ class TimerProvider extends ChangeNotifier {
 
     switch (_phase) {
       case PomodoroPhase.focus:
+        _sessionCount++;
         if (!_skipped) {
-          _sessionCount++;
           _settings.incrementLifetimeSessions();
           _stats.logSession(_settings.focusDuration);
         }

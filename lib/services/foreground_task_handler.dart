@@ -43,12 +43,15 @@ class TimerTaskHandler extends TaskHandler {
     final remaining = _endTime!.difference(now);
 
     if (remaining.inSeconds <= 0) {
-      // Phase complete! Add a little buffer so UI can handle it
+      // Phase complete — show Start button (not Skip) so the user
+      // can begin the new phase from the notification.
+      _endTime = null; // prevent repeat firing every second
       FlutterForegroundTask.updateService(
         notificationTitle: 'Phase Complete! 🎉',
         notificationText: 'Tap to return to CapyDoro.',
         notificationButtons: [
-          const NotificationButton(id: 'btn_skip', text: 'Next Phase'),
+          const NotificationButton(id: 'btn_start', text: 'Start'),
+          const NotificationButton(id: 'btn_reset', text: 'Reset'),
         ],
       );
 

@@ -15,7 +15,7 @@ class StatsProvider extends ChangeNotifier {
   // ─── Getters ────────────────────────────────────────────
 
   List<SessionRecord> get recentSessions =>
-      List.unmodifiable(_sessions.reversed);
+      List.unmodifiable(_sessions.reversed.take(10));
 
   int get lifetimeSessions => _sessions.length;
 
