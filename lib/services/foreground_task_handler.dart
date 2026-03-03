@@ -20,9 +20,10 @@ class TimerTaskHandler extends TaskHandler {
   void onReceiveData(Object data) {
     if (data is Map<String, dynamic>) {
       if (data.containsKey('endTimeMillis')) {
-        _endTime = DateTime.fromMillisecondsSinceEpoch(
-          data['endTimeMillis'] as int,
-        );
+        final millis = data['endTimeMillis'] as int;
+        _endTime = millis > 0
+            ? DateTime.fromMillisecondsSinceEpoch(millis)
+            : null;
       }
       if (data.containsKey('phaseLabel')) {
         _phaseLabel = data['phaseLabel'] as String;

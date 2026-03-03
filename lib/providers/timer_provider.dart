@@ -71,7 +71,8 @@ class TimerProvider extends ChangeNotifier {
   void _tick() {
     if (_endTime == null) return;
 
-    final remaining = _endTime!.difference(DateTime.now()).inSeconds;
+    final remainingMs = _endTime!.difference(DateTime.now()).inMilliseconds;
+    final remaining = (remainingMs / 1000).ceil();
 
     if (remaining > 0) {
       _remainingSeconds = remaining;
@@ -88,8 +89,8 @@ class TimerProvider extends ChangeNotifier {
 
     if (_endTime != null) {
       // Recalculate precisely how much is left so we can resume accurately
-      final diff = _endTime!.difference(DateTime.now()).inSeconds;
-      _remainingSeconds = diff > 0 ? diff : 0;
+      final diffMs = _endTime!.difference(DateTime.now()).inMilliseconds;
+      _remainingSeconds = diffMs > 0 ? (diffMs / 1000).ceil() : 0;
       _endTime = null;
     }
 
