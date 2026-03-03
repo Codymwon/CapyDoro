@@ -14,6 +14,7 @@ class TimerProvider extends ChangeNotifier {
   int _totalSeconds = 0;
   int _sessionCount = 0; // completed focus sessions
   bool _isRunning = false;
+  bool _skipped = false;
   Timer? _timer;
   DateTime? _endTime;
 
@@ -99,6 +100,7 @@ class TimerProvider extends ChangeNotifier {
   void skip() {
     _timer?.cancel();
     _isRunning = false;
+    _skipped = true;
     _onPhaseComplete();
   }
 
@@ -145,9 +147,11 @@ class TimerProvider extends ChangeNotifier {
 
     switch (_phase) {
       case PomodoroPhase.focus:
-        _sessionCount++;
-        _settings.incrementLifetimeSessions();
-        _stats.logSession(_settings.focusDuration);
+        if (!_skipped) {
+          _sessionCount++;
+          _settings.incrementLifetimeSessions();
+          _stats.logSession(_settings.focusDuration);
+        }
 
         // Play sound for finishing focus and entering break
         if (_settings.soundEnabled) {
@@ -211,6 +215,7 @@ class TimerProvider extends ChangeNotifier {
       case PomodoroPhase.completed:
         break;
     }
+    _skipped = false;
   }
 
   @override

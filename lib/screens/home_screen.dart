@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (id == 'btn_pause') {
           _timer.pause();
           _updateForegroundService();
-        } else if (id == 'btn_resume') {
+        } else if (id == 'btn_resume' || id == 'btn_start') {
           _timer.start();
           _updateForegroundService();
         } else if (id == 'btn_skip') {
@@ -114,7 +114,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         id: _timer.isRunning ? 'btn_pause' : 'btn_resume',
         text: _timer.isRunning ? 'Pause' : 'Resume',
       ),
-      const NotificationButton(id: 'btn_skip', text: 'Skip'),
+      _timer.isRunning
+          ? const NotificationButton(id: 'btn_skip', text: 'Skip')
+          : const NotificationButton(id: 'btn_start', text: 'Start'),
       const NotificationButton(id: 'btn_reset', text: 'Reset'),
     ];
 
@@ -154,7 +156,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           id: _timer.isRunning ? 'btn_pause' : 'btn_resume',
           text: _timer.isRunning ? 'Pause' : 'Resume',
         ),
-        const NotificationButton(id: 'btn_skip', text: 'Skip'),
+        _timer.isRunning
+            ? const NotificationButton(id: 'btn_skip', text: 'Skip')
+            : const NotificationButton(id: 'btn_start', text: 'Start'),
         const NotificationButton(id: 'btn_reset', text: 'Reset'),
       ];
 
