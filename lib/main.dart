@@ -8,6 +8,7 @@ import 'providers/theme_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/stats_provider.dart';
 import 'screens/home_screen.dart';
+import 'services/audio_service.dart';
 
 late final SettingsProvider settingsProvider;
 late final StatsProvider statsProvider;
@@ -21,6 +22,8 @@ void main() async {
   settingsProvider = SettingsProvider(prefs);
   statsProvider = StatsProvider(prefs);
   themeProvider = ThemeProvider(settingsProvider);
+
+  await AudioService().init();
 
   // Initialize port for communication between TaskHandler and UI.
   FlutterForegroundTask.initCommunicationPort();
